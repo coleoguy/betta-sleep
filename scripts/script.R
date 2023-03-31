@@ -34,11 +34,13 @@ data <- read.csv("../data/plakats-24-15fpsDLC_dlcrnetms5_plakat-trackingMar8shuf
                  header=T, na.strings=c(""," ","NA"))[-c(1:7),c(2:4,32:34)]
 
 b1 <- data[,1:3]
-b2 <- data[,1:3]
-data[,1] <- as.numeric(data[,1])
-data[,2] <- as.numeric(data[,2])
+b1[,1] <- as.numeric(b1[,1])
+b1[,2] <- as.numeric(b1[,2])
+b2 <- data[,4:6]
+b2[,1] <- as.numeric(b2[,1])
+b2[,2] <- as.numeric(b2[,2])
 
-plot(GetData(x, reclen = 24, window = .10, stat="sum"))
+plot(GetData(b1, reclen = 24, window = 1, stat="sum"))
   
   
   
