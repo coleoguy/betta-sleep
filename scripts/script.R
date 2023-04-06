@@ -2,6 +2,7 @@
 # 03/27/2023
 
 library(tidyr)
+library(ggplot2)
 
 GetData <- function(x, reclen, window, stat){
   Displacement <- function(x){
@@ -30,7 +31,7 @@ GetData <- function(x, reclen, window, stat){
   return(movement)
 }
 
-data <- read.csv("../data/plakats-24-15fpsDLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
+data <- read.csv("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
                  header=T, na.strings=c(""," ","NA"))[-c(1:7),c(2:4,32:34)]
 
 b1 <- data[,1:3]
@@ -40,7 +41,15 @@ b2 <- data[,4:6]
 b2[,1] <- as.numeric(b2[,1])
 b2[,2] <- as.numeric(b2[,2])
 
-plot(GetData(b1, reclen = 24, window = 1, stat="sum"))
-  
-  
-  
+Plot <- function(x){
+  plot(GetData(x, reclen = 48, window = 1, stat="sum"), type = 'l', xaxt='n')
+  axis(side=1, at=c(0:48))  
+  rect(xleft=10,xright =22,ybottom=0,ytop=70000, density=NA, col = rgb(0.1,0.1,0.1,alpha=0.5))
+  rect(xleft=34,xright =46,ybottom=0,ytop=70000, density=NA, col = rgb(0.1,0.1,0.1,alpha=0.5))  
+}
+
+Plot(b1)
+
+
+p <- ggplot(data=GetData(b1, reclen = 48, window = 1, stat="sum"), aes(x=interval, y=OR, colour=Drug)) + geom_point() + geom_line()
+p <- p+geom_ribbon(aes(ymin=data$lower, ymax=data$upper), linetype=2, alpha=0.1)
