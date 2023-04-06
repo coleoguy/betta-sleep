@@ -51,5 +51,5 @@ Plot <- function(x){
 Plot(b1)
 
 
-p <- ggplot(data=GetData(b1, reclen = 48, window = 1, stat="sum"), aes(x=interval, y=OR, colour=Drug)) + geom_point() + geom_line()
-p <- p+geom_ribbon(aes(ymin=data$lower, ymax=data$upper), linetype=2, alpha=0.1)
+p <- ggplot(data=GetData(b1, reclen = 48, window = 1, stat="sum"), aes()) + geom_point() + geom_line()
+p <- p+geom_ribbon(aes(ymin=, ymax=), linetype=2, alpha=0.1)
