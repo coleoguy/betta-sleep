@@ -4,7 +4,7 @@
 library(tidyr)
 library(ggplot2)
 
-GetData <- function(x, reclen, window, stat){
+GetMovement <- function(x, reclen, window, stat){
   Displacement <- function(x){
     dx <- x[1:(nrow(x)-1),1] - x[2:nrow(x),1]
     dy <- x[1:(nrow(x)-1),2] - x[2:nrow(x),2]
@@ -30,26 +30,67 @@ GetData <- function(x, reclen, window, stat){
   }
   return(movement)
 }
-
-data <- read.csv("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
-                 header=T, na.strings=c(""," ","NA"))[-c(1:7),c(2:4,32:34)]
-
-b1 <- data[,1:3]
-b1[,1] <- as.numeric(b1[,1])
-b1[,2] <- as.numeric(b1[,2])
-b2 <- data[,4:6]
-b2[,1] <- as.numeric(b2[,1])
-b2[,2] <- as.numeric(b2[,2])
-
-Plot <- function(x){
-  plot(GetData(x, reclen = 48, window = 1, stat="sum"), type = 'l', xaxt='n')
-  axis(side=1, at=c(0:48))  
-  rect(xleft=10,xright =22,ybottom=0,ytop=70000, density=NA, col = rgb(0.1,0.1,0.1,alpha=0.5))
-  rect(xleft=34,xright =46,ybottom=0,ytop=70000, density=NA, col = rgb(0.1,0.1,0.1,alpha=0.5))  
+GetData <- function(files){
+  
+  dat <- matrix(NA, (length(files)*2), 48)
+  counter <- 0
+  
+  for(i in 1:length(files)){
+    video <- read.csv(files[i], header=T, na.strings=c(""," ","NA"))[-c(1:7),c(2:4,32:34)]
+    b1 <- video[,1:3]
+    b1[,1] <- as.numeric(b1[,1])
+    b1[,2] <- as.numeric(b1[,2])
+    b2 <- video[,4:6]
+    b2[,1] <- as.numeric(b2[,1])
+    b2[,2] <- as.numeric(b2[,2])
+    
+    counter <- counter + 1
+    dat[counter, 1:48] <- GetMovement(b1, reclen = 48, window = 1, stat="sum")
+    counter <- counter + 1
+    dat[counter, 1:48] <- GetMovement(b2, reclen = 48, window = 1, stat="sum")
+  }
+  
+  upper <- lower <- c()
+  for(i in 1:48){
+    x <- t.test(dat[,i])$conf.int
+    lower[i] <- x[1]
+    upper[i] <- x[2]
+  }
+  df <- data.frame(colMeans(dat), lower, upper)
+  colnames(df)[1] <- "activity"
+  
+  return(df)
 }
 
-Plot(b1)
+
+csv.names <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
+               "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
 
 
-p <- ggplot(data=GetData(b1, reclen = 48, window = 1, stat="sum"), aes()) + geom_point() + geom_line()
-p <- p+geom_ribbon(aes(ymin=, ymax=), linetype=2, alpha=0.1)
+df <- GetData(csv.names)
+
+
+# Plotting - Requires df of means, lower, upper columns
+ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_blank(),
+                              panel.border=element_blank(),
+                              axis.line = element_line(colour="grey30"),
+                              axis.title = element_text(colour="grey20"),
+                              axis.text = (element_text(colour="grey30")),
+                              legend.title = element_text(colour="grey20"),
+                              legend.text = element_text(colour="grey30"))
+
+ggplot(df, aes(x = 1:48, y = activity)) + 
+  ggtheme +
+  geom_line(col="black") + 
+  geom_point() + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), 
+              alpha=0.1, 
+              linetype="dashed",
+              color="grey") +
+  annotate("rect", xmin = 10, xmax = 22, ymin = -1, ymax = 70000,
+           alpha = .2,fill = "gray5") +
+  annotate("rect", xmin = 34, xmax = 46, ymin = -1, ymax = 70000,
+           alpha = .2,fill = "gray5")
+
