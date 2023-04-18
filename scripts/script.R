@@ -4,6 +4,7 @@
 library(tidyr)
 library(ggplot2)
 
+#TODO separate funcitions so that things do not need to be run twice
 GetMovement <- function(x, reclen, window, stat){
   Displacement <- function(x){
     dx <- x[1:(nrow(x)-1),1] - x[2:nrow(x),1]
@@ -30,9 +31,10 @@ GetMovement <- function(x, reclen, window, stat){
   }
   return(movement)
 }
-GetAct <- function(files){
+GetAct <- function(files, reclen, window){
   
-  dat <- matrix(NA, (length(files)*2), 48)
+  bins <- reclen/window
+  dat <- matrix(NA, (length(files)*2), bins)
   counter <- 0
   
   for(i in 1:length(files)){
@@ -45,13 +47,13 @@ GetAct <- function(files){
     b2[,2] <- as.numeric(b2[,2])
     
     counter <- counter + 1
-    dat[counter, 1:48] <- GetMovement(b1, reclen = 48, window = 1, stat="sum")
+    dat[counter, 1:bins] <- GetMovement(b1, reclen = reclen, window = window, stat="sum")
     counter <- counter + 1
-    dat[counter, 1:48] <- GetMovement(b2, reclen = 48, window = 1, stat="sum")
+    dat[counter, 1:bins] <- GetMovement(b2, reclen = reclen, window = window, stat="sum")
   }
   
   upper <- lower <- c()
-  for(i in 1:48){
+  for(i in 1:bins){
     x <- t.test(dat[,i])$conf.int
     lower[i] <- x[1]
     upper[i] <- x[2]
@@ -61,16 +63,45 @@ GetAct <- function(files){
   
   return(df)
 }
+CountSleepB <- function(files, reclen, window) {
+  
+  bins <- reclen/window
+  dat <- matrix(NA, (length(files)*2), bins)
+  counter <- 0
+  
+  for(i in 1:length(files)){
+    video <- read.csv(files[i], header=T, na.strings=c(""," ","NA"))[-c(1:7),c(2:4,32:34)]
+    b1 <- video[,1:3]
+    b1[,1] <- as.numeric(b1[,1])
+    b1[,2] <- as.numeric(b1[,2])
+    b2 <- video[,4:6]
+    b2[,1] <- as.numeric(b2[,1])
+    b2[,2] <- as.numeric(b2[,2])
+    
+    counter <- counter + 1
+    dat[counter, 1:bins] <- GetMovement(b1, reclen = reclen, window = window, stat="sum")
+    counter <- counter + 1
+    dat[counter, 1:bins] <- GetMovement(b2, reclen = reclen, window = window, stat="sum")
+  }
+  
+  sleeps <- 0
+  for(i in 1:length(dat[1,])){
+    if(dat[1,i] < 1000)
+      #TODO ignore points that are together: same sleeping event
+      sleeps <- sleeps + 1
+  }
+  
+  return(sleeps)
+}
+
+yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
+            "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
 
 
-csv.names <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
-               "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
+yp.act <- GetAct(yp.csv, 48, 0.2)
 
 
-yp.act <- GetAct(csv.names)
-
-
-act.plot <- function(df) {
+Act.Plot <- function(df, reclen, window) {
   ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
                                 panel.grid.minor = element_blank(),
                                 panel.background = element_blank(),
@@ -80,8 +111,9 @@ act.plot <- function(df) {
                                 axis.text = (element_text(colour="grey30")),
                                 legend.title = element_text(colour="grey20"),
                                 legend.text = element_text(colour="grey30"))
-
-  ggplot(df, aes(x = 1:48, y = activity)) + 
+  
+  bins <- reclen/window
+  ggplot(df, aes(x = 1:bins, y = activity)) + 
     ggtheme +
     geom_line(col="black") + 
     geom_point() + 
@@ -89,8 +121,8 @@ act.plot <- function(df) {
                 alpha=0.1, 
                 linetype="dashed",
                 color="grey") +
-    annotate("rect", xmin = 10, xmax = 22, ymin = -1, ymax = 70000,
+    annotate("rect", xmin = 10/window, xmax = 22/window, ymin = -1, ymax = max(df),
              alpha = .2,fill = "gray5") +
-    annotate("rect", xmin = 34, xmax = 46, ymin = -1, ymax = 70000,
+    annotate("rect", xmin = 34/window, xmax = 46/window, ymin = -1, ymax = max(df),
              alpha = .2,fill = "gray5")
 }
