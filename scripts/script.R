@@ -30,7 +30,7 @@ GetMovement <- function(x, reclen, window, stat){
   }
   return(movement)
 }
-GetData <- function(files){
+GetAct <- function(files){
   
   dat <- matrix(NA, (length(files)*2), 48)
   counter <- 0
@@ -67,30 +67,30 @@ csv.names <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1
                "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
 
 
-df <- GetData(csv.names)
+yp.act <- GetAct(csv.names)
 
 
-# Plotting - Requires df of means, lower, upper columns
-ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
-                              panel.grid.minor = element_blank(),
-                              panel.background = element_blank(),
-                              panel.border=element_blank(),
-                              axis.line = element_line(colour="grey30"),
-                              axis.title = element_text(colour="grey20"),
-                              axis.text = (element_text(colour="grey30")),
-                              legend.title = element_text(colour="grey20"),
-                              legend.text = element_text(colour="grey30"))
+act.plot <- function(df) {
+  ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
+                                panel.grid.minor = element_blank(),
+                                panel.background = element_blank(),
+                                panel.border=element_blank(),
+                                axis.line = element_line(colour="grey30"),
+                                axis.title = element_text(colour="grey20"),
+                                axis.text = (element_text(colour="grey30")),
+                                legend.title = element_text(colour="grey20"),
+                                legend.text = element_text(colour="grey30"))
 
-ggplot(df, aes(x = 1:48, y = activity)) + 
-  ggtheme +
-  geom_line(col="black") + 
-  geom_point() + 
-  geom_ribbon(aes(ymin = lower, ymax = upper), 
-              alpha=0.1, 
-              linetype="dashed",
-              color="grey") +
-  annotate("rect", xmin = 10, xmax = 22, ymin = -1, ymax = 70000,
-           alpha = .2,fill = "gray5") +
-  annotate("rect", xmin = 34, xmax = 46, ymin = -1, ymax = 70000,
-           alpha = .2,fill = "gray5")
-
+  ggplot(df, aes(x = 1:48, y = activity)) + 
+    ggtheme +
+    geom_line(col="black") + 
+    geom_point() + 
+    geom_ribbon(aes(ymin = lower, ymax = upper), 
+                alpha=0.1, 
+                linetype="dashed",
+                color="grey") +
+    annotate("rect", xmin = 10, xmax = 22, ymin = -1, ymax = 70000,
+             alpha = .2,fill = "gray5") +
+    annotate("rect", xmin = 34, xmax = 46, ymin = -1, ymax = 70000,
+             alpha = .2,fill = "gray5")
+}
