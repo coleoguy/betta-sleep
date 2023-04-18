@@ -31,7 +31,8 @@ GetMovement <- function(x, reclen, window, stat){
   }
   return(movement)
 }
-GetAct <- function(files, reclen, window){
+
+GetData <- function(files, reclen, window){
   
   bins <- reclen/window
   dat <- matrix(NA, (length(files)*2), bins)
@@ -51,7 +52,13 @@ GetAct <- function(files, reclen, window){
     counter <- counter + 1
     dat[counter, 1:bins] <- GetMovement(b2, reclen = reclen, window = window, stat="sum")
   }
+  return(dat)
+}
+
+GetAct <- function(files, reclen, window){
   
+  dat <- GetData(files, reclen, window)
+  bins <- reclen/window
   upper <- lower <- c()
   for(i in 1:bins){
     x <- t.test(dat[,i])$conf.int
@@ -63,27 +70,10 @@ GetAct <- function(files, reclen, window){
   
   return(df)
 }
+
 CountSleepB <- function(files, reclen, window) {
-  
-  bins <- reclen/window
-  dat <- matrix(NA, (length(files)*2), bins)
-  counter <- 0
-  
-  for(i in 1:length(files)){
-    video <- read.csv(files[i], header=T, na.strings=c(""," ","NA"))[-c(1:7),c(2:4,32:34)]
-    b1 <- video[,1:3]
-    b1[,1] <- as.numeric(b1[,1])
-    b1[,2] <- as.numeric(b1[,2])
-    b2 <- video[,4:6]
-    b2[,1] <- as.numeric(b2[,1])
-    b2[,2] <- as.numeric(b2[,2])
-    
-    counter <- counter + 1
-    dat[counter, 1:bins] <- GetMovement(b1, reclen = reclen, window = window, stat="sum")
-    counter <- counter + 1
-    dat[counter, 1:bins] <- GetMovement(b2, reclen = reclen, window = window, stat="sum")
-  }
-  
+
+  dat <- GetData(files, reclen, window)
   sleeps <- 0
   for(i in 1:length(dat[1,])){
     if(dat[1,i] < 1000)
@@ -93,6 +83,7 @@ CountSleepB <- function(files, reclen, window) {
   
   return(sleeps)
 }
+
 
 yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
             "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
