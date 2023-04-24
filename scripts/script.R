@@ -86,11 +86,15 @@ CountSleepB <- function(files, reclen, window) {
 
 
 yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
-            "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
+            "../data/YP-03-04-apr04DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
+            "../data/YP-05-06-apr07DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv",
+            "../data/YP-07-08-apr11DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
+
+wtbs.csv <- c("../data/WT-BS-01-02-apr14DLC_dlcrnetms5_plakat-trackingMar8shuffle1_50000_el.csv")
 
 
 yp.act <- GetAct(yp.csv, 48, 0.2)
-
+wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
 
 Act.Plot <- function(df, reclen, window) {
   ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
