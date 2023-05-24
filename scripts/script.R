@@ -4,7 +4,6 @@
 library(tidyr)
 library(ggplot2)
 
-#TODO separate funcitions so that things do not need to be run twice
 GetMovement <- function(x, reclen, window, stat){
   Displacement <- function(x){
     dx <- x[1:(nrow(x)-1),1] - x[2:nrow(x),1]
@@ -31,7 +30,6 @@ GetMovement <- function(x, reclen, window, stat){
   }
   return(movement)
 }
-
 GetData <- function(files, reclen, window){
   
   bins <- reclen/window
@@ -54,7 +52,6 @@ GetData <- function(files, reclen, window){
   }
   return(dat)
 }
-
 GetAct <- function(files, reclen, window){
   
   dat <- GetData(files, reclen, window)
@@ -71,17 +68,26 @@ GetAct <- function(files, reclen, window){
   return(df)
 }
 
-CountSleepB <- function(files, reclen, window) {
 
-  dat <- GetData(files, reclen, window)
-  sleeps <- 0
-  for(i in 1:length(dat[1,])){
-    if(dat[1,i] < 1000)
-      #TODO ignore points that are together: same sleeping event
-      sleeps <- sleeps + 1
-  }
-  
-  return(sleeps)
+# TODO finish function
+CountRest <- function(files, reclen = 48, window = 0.0003) {
+  dat <- GetAct(files, reclen, window)
+  day.night <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
+  colnames(day.night) <- c("time", "movement")
+  day.night[,2] <- dat[,1]
+  day.night[1:30000,1] <- "day"
+  day.night[70001:110000,1] <- "day"
+  day.night[150001:160000,1] <- "day"
+  day.night[30001:70000,1] <- "night"
+  day.night[110001:150000,1] <- "night"
+  night <- day.night[day.night$time == "night", "movement"]
+  day <- day.night[day.night$time == "day", "movement"]
+  sequences <- rle(day.night$movement < 3.1)
+  lengths <- sequences$lengths[sequences$values]
+  rest <- lengths[lengths > 59]
+  rest.df <- data.frame(matrix(NA, nrow = length(lengths), ncol = 1))
+  colnames(rest.df) <- c("rlength")
+  rest.df$rlength <- lengths
 }
 
 
@@ -90,7 +96,8 @@ yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv
             "../data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "../data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
-wtbs.csv <- c("../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
+wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+              "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 
 yp.act <- GetAct(yp.csv, 48, 0.2)
@@ -116,11 +123,16 @@ Act.Plot <- function(df, reclen, window) {
                 alpha=0.1, 
                 linetype="dashed",
                 color="grey") +
-    annotate("rect", xmin = 10/window, xmax = 22/window, ymin = -1, ymax = max(df),
+    annotate("rect", xmin = 9/window, xmax = 21/window, ymin = -1, ymax = max(df),
              alpha = .2,fill = "gray5") +
-    annotate("rect", xmin = 34/window, xmax = 46/window, ymin = -1, ymax = max(df),
+    annotate("rect", xmin = 33/window, xmax = 45/window, ymin = -1, ymax = max(df),
              alpha = .2,fill = "gray5")
 }
 
 
+# Plot day.night distributions
+ggplot(day.night, aes(x=movement, color=time)) +
+  ggtheme +
+  geom_histogram(fill='white', alpha=0.5, position = 'identity') +
+  xlim(0,10)
 
