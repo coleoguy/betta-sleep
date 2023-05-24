@@ -71,7 +71,10 @@ GetAct <- function(files, reclen, window){
 
 # TODO finish function
 CountRest <- function(files, reclen = 48, window = 0.0003) {
+  # Gest data in "dat" for roughly every second
   dat <- GetAct(files, reclen, window)
+  ## TODO turn into cm or mm per second
+  # TEMPORARY - this whole section categorizes data into day and night
   day.night <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
   colnames(day.night) <- c("time", "movement")
   day.night[,2] <- dat[,1]
@@ -80,11 +83,13 @@ CountRest <- function(files, reclen = 48, window = 0.0003) {
   day.night[150001:160000,1] <- "day"
   day.night[30001:70000,1] <- "night"
   day.night[110001:150000,1] <- "night"
-  night <- day.night[day.night$time == "night", "movement"]
-  day <- day.night[day.night$time == "day", "movement"]
-  sequences <- rle(day.night$movement < 3.1)
+  # Measures run lengths lower than 4.9 pixels per second, in rle format
+  sequences <- rle(day.night$movement < 4.9)
+  # Puts the lengths of the runs in "lengths" vector
   lengths <- sequences$lengths[sequences$values]
-  rest <- lengths[lengths > 59]
+  ##### Needed? rest <- lengths[lengths > 59] for filter
+  ## TODO get threshold for inactivity to be rest
+  # Puts data on rest dataframe, could be done in less lines
   rest.df <- data.frame(matrix(NA, nrow = length(lengths), ncol = 1))
   colnames(rest.df) <- c("rlength")
   rest.df$rlength <- lengths
@@ -103,6 +108,11 @@ wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_e
 yp.act <- GetAct(yp.csv, 48, 0.2)
 wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
 
+
+
+## PLOTTING
+
+# Plot locomotion through time
 Act.Plot <- function(df, reclen, window) {
   ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
                                 panel.grid.minor = element_blank(),
@@ -129,10 +139,17 @@ Act.Plot <- function(df, reclen, window) {
              alpha = .2,fill = "gray5")
 }
 
-
 # Plot day.night distributions
 ggplot(day.night, aes(x=movement, color=time)) +
   ggtheme +
   geom_histogram(fill='white', alpha=0.5, position = 'identity') +
   xlim(0,10)
+
+# Plot run-lengths 
+plot(lengths, ylim = c(0,100))
+abline(h = 60, col = "purple")
+abline(h = 30, col = "blue")
+abline(h = 20, col = "red")
+
+
 
