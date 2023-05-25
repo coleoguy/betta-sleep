@@ -93,6 +93,8 @@ CountRest <- function(files, reclen = 48, window = 0.0003) {
   rest.df <- data.frame(matrix(NA, nrow = length(lengths), ncol = 1))
   colnames(rest.df) <- c("rlength")
   rest.df$rlength <- lengths
+  
+  
 }
 
 
