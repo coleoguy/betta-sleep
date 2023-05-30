@@ -68,8 +68,6 @@ GetAct <- function(files, reclen, window){
   
   return(df)
 }
-
-# TODO finish function
 CountRest <- function(files, drift = 4.9, runlength = 60, reclen = 48, window = 0.0003) {
   # Gest data in "dat" for roughly every second
   dat <- GetData(files, reclen, window)
@@ -113,6 +111,44 @@ CountRest <- function(files, drift = 4.9, runlength = 60, reclen = 48, window = 
   
 }
 
+## TODO measure diurnality and "crepuscularity"
+Crepuscularity <- function(files, reclen = 48, window = 0.0003) {
+  # Get data for strain
+  dat <- GetAct(files, reclen, window)
+  # create df for data labeled by time
+  day.night <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
+  colnames(day.night) <- c("time", "movement")
+  # assign time for each second
+  day.night[,2] <- dat[,1]
+  day.night[23334:36666,1] <- "crepusculo"
+  day.night[63334:76666,1] <- "crepusculo"
+  day.night[103334:116666,1] <- "crepusculo"
+  day.night[143334:156666,1] <- "crepusculo"
+  day.night[1:23333,1] <- "day"
+  day.night[76667:103333,1] <- "day"
+  day.night[156667:160000,1] <- "day"
+  day.night[36667:63333,1] <- "night"
+  day.night[116667:143333,1] <- "night"
+  # create summary df
+   summary.time <- day.night %>%
+       group_by(time) %>%
+       summarize(Mean = mean(movement),
+                 SE = sd(movement) / sqrt(n()))
+   
+   ggplot(summary.time, aes(x = time, y = Sum, fill = time)) +
+     geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.9)) +
+     geom_errorbar(aes(ymin = Sum - SE, ymax = Sum + SE),
+                   width = 0.2, position = position_dodge(width = 0.9)) +
+     labs(x = "time", y = "Total locomotion(px/s)") +
+     ggtitle("Locomotion for time of day")
+   
+   
+}
+
+
+
+
+
 
 yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "../data/YP-03-04-apr04DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
@@ -126,9 +162,9 @@ wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_e
               "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 
-yp.act <- GetAct(yp.csv, 48, 0.2)
-sr.act <- GetAct(sr.csv, 48, 0.2)
-wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
+yp.act <- GetAct(yp.csv, 48, 0.0003)
+sr.act <- GetAct(sr.csv, 48, 0.0003)
+wtbs.act <- GetAct(wtbs.csv, 48, 0.0003)
 
 
 
