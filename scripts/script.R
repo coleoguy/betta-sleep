@@ -2,6 +2,7 @@
 # 03/27/2023
 
 library(tidyr)
+library(dplyr)
 library(ggplot2)
 
 GetMovement <- function(x, reclen, window, stat){
@@ -69,17 +70,17 @@ GetAct <- function(files, reclen, window){
 }
 
 # TODO finish function
-CountRest <- function(files, reclen = 48, window = 0.0003) {
+CountRest <- function(files, drift = 4.9, runlength = 60, reclen = 48, window = 0.0003) {
   # Gest data in "dat" for roughly every second
   dat <- GetData(files, reclen, window)
   ## TODO turn into cm or mm per second
   bouts <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
   colnames(bouts) <- c("total", "mean")
   for (i in 1:length(dat[,1])) {
-    sequences <- rle(dat[i,] < 4.9)
+    sequences <- rle(dat[i,] < drift)
     for (j in 1:length(sequences$lengths)) {
       runs <- c()
-      runs <- sequences$lengths[sequences$lengths > 60]
+      runs <- sequences$lengths[sequences$lengths > runlength]
     }
     #lengths <- sequences$lengths
     bouts[i,1] <- sum(runs)
@@ -174,13 +175,27 @@ abline(h = 20, col = "red")
 
 # Plotting rest bouts
 ##Bout.plot
-combined_df <- data.frame(cbind(yp.rest$total, sr.rest$total, wtbs.rest$total))
+combined_df <- data.frame(cbind(yp.rest$mean, sr.rest$mean, wtbs.rest$mean))
 colnames(combined_df) <- c("yellow plakat", "superRed", "WT")
-group_colors <- c("yellow plakat" = "yellow", "superRed" = "red", "WT" = "green")
+group_colors <- c("superRed" = "red", "WT" = "green", "yellow plakat" = "yellow")
 df_long <- tidyr::gather(combined_df, key = "Group", value = "Values")
+summary_df <- df_long %>%
+  group_by(Group) %>%
+  summarize(Mean = mean(Values),
+            SE = sd(Values) / sqrt(length(Values)))
+
+ggplot(df_long, aes(x = Group, y = Values, fill = Group)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = group_colors, fill = group_colors) +
+  geom_jitter(position = position_dodge(width = 0.9)) +
+  #geom_errorbar(data = summary_df, aes(ymin = (Mean - SE), ymax = (Mean + SE)),
+  #              width = 0.2, position = position_dodge(width = 0.9), color = "black") +
+  labs(x = "Strain", y = "mean length in seconds") +
+  ggtitle("mean length of rest bouts")
+
 ggplot(df_long, aes(x = Group, y = Values, fill = Group)) +
   geom_violin() +
   scale_fill_manual(values = group_colors) +
   labs(x = "strain", y = "Hours of rest") +
   ggtitle("Hours of rest per day")
-  
+
+    
