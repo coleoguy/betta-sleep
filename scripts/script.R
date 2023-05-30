@@ -68,31 +68,46 @@ GetAct <- function(files, reclen, window){
   return(df)
 }
 
-
 # TODO finish function
 CountRest <- function(files, reclen = 48, window = 0.0003) {
   # Gest data in "dat" for roughly every second
-  dat <- GetAct(files, reclen, window)
+  dat <- GetData(files, reclen, window)
   ## TODO turn into cm or mm per second
-  # TEMPORARY - this whole section categorizes data into day and night
-  day.night <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
-  colnames(day.night) <- c("time", "movement")
-  day.night[,2] <- dat[,1]
-  day.night[1:30000,1] <- "day"
-  day.night[70001:110000,1] <- "day"
-  day.night[150001:160000,1] <- "day"
-  day.night[30001:70000,1] <- "night"
-  day.night[110001:150000,1] <- "night"
-  # Measures run lengths lower than 4.9 pixels per second, in rle format
-  sequences <- rle(day.night$movement < 4.9)
-  # Puts the lengths of the runs in "lengths" vector
-  lengths <- sequences$lengths[sequences$values]
-  ##### Needed? rest <- lengths[lengths > 59] for filter
-  ## TODO get threshold for inactivity to be rest
-  # Puts data on rest dataframe, could be done in less lines
-  rest.df <- data.frame(matrix(NA, nrow = length(lengths), ncol = 1))
-  colnames(rest.df) <- c("rlength")
-  rest.df$rlength <- lengths
+  bouts <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
+  colnames(bouts) <- c("total", "mean")
+  for (i in 1:length(dat[,1])) {
+    sequences <- rle(dat[i,] < 4.9)
+    for (j in 1:length(sequences$lengths)) {
+      runs <- c()
+      runs <- sequences$lengths[sequences$lengths > 60]
+    }
+    #lengths <- sequences$lengths
+    bouts[i,1] <- sum(runs)
+    bouts[i,2] <- mean(runs)
+  }
+  bouts[,1] <- (bouts/3600)/2
+  return(bouts)
+  
+  
+  # # TEMPORARY - this whole section categorizes data into day and night
+  # day.night <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
+  # colnames(day.night) <- c("time", "movement")
+  # day.night[,2] <- dat[,1]
+  # day.night[1:30000,1] <- "day"
+  # day.night[70001:110000,1] <- "day"
+  # day.night[150001:160000,1] <- "day"
+  # day.night[30001:70000,1] <- "night"
+  # day.night[110001:150000,1] <- "night"
+  # # Measures run lengths lower than 4.9 pixels per second, in rle format
+  # sequences <- rle(day.night$movement < 4.9)
+  # # Puts the lengths of the runs in "lengths" vector
+  # lengths <- sequences$lengths[sequences$values]
+  # ##### Needed? rest <- lengths[lengths > 59] for filter
+  # ## TODO get threshold for inactivity to be rest
+  # # Puts data on rest dataframe, could be done in less lines
+  # rest.df <- data.frame(matrix(NA, nrow = length(lengths), ncol = 1))
+  # colnames(rest.df) <- c("rlength")
+  # rest.df$rlength <- lengths
   
   
 }
@@ -103,7 +118,8 @@ yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv
             "../data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "../data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
-sr.csv <- c("../data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
+sr.csv <- c("../data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "../data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
@@ -156,5 +172,15 @@ abline(h = 60, col = "purple")
 abline(h = 30, col = "blue")
 abline(h = 20, col = "red")
 
-
-
+# Plotting rest bouts
+##Bout.plot
+combined_df <- data.frame(cbind(yp.rest$total, sr.rest$total, wtbs.rest$total))
+colnames(combined_df) <- c("yellow plakat", "superRed", "WT")
+group_colors <- c("yellow plakat" = "yellow", "superRed" = "red", "WT" = "green")
+df_long <- tidyr::gather(combined_df, key = "Group", value = "Values")
+ggplot(df_long, aes(x = Group, y = Values, fill = Group)) +
+  geom_violin() +
+  scale_fill_manual(values = group_colors) +
+  labs(x = "strain", y = "Hours of rest") +
+  ggtitle("Hours of rest per day")
+  
