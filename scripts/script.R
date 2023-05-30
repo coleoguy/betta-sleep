@@ -120,25 +120,35 @@ Crepuscularity <- function(files, reclen = 48, window = 0.0003) {
   colnames(day.night) <- c("time", "movement")
   # assign time for each second
   day.night[,2] <- dat[,1]
-  day.night[23334:36666,1] <- "crepusculo"
-  day.night[63334:76666,1] <- "crepusculo"
-  day.night[103334:116666,1] <- "crepusculo"
-  day.night[143334:156666,1] <- "crepusculo"
+  
+  day.night[1:3333,1] <- "twilight"
+  day.night[63334:76666,1] <- "twilight"
+  day.night[103334:116666,1] <- "twilight"
+  day.night[143334:156666,1] <- "twilight"
   day.night[1:23333,1] <- "day"
   day.night[76667:103333,1] <- "day"
   day.night[156667:160000,1] <- "day"
   day.night[36667:63333,1] <- "night"
   day.night[116667:143333,1] <- "night"
+  
+  # day.night[23334:36666,1] <- "twilight"
+  # day.night[63334:76666,1] <- "twilight"
+  # day.night[103334:116666,1] <- "twilight"
+  # day.night[143334:156666,1] <- "twilight"
+  # day.night[1:23333,1] <- "day"
+  # day.night[76667:103333,1] <- "day"
+  # day.night[156667:160000,1] <- "day"
+  # day.night[36667:63333,1] <- "night"
+  # day.night[116667:143333,1] <- "night"
+  
   # create summary df
-   summary.time <- day.night %>%
+  summary.time <- day.night %>%
        group_by(time) %>%
-       summarize(Mean = mean(movement),
-                 SE = sd(movement) / sqrt(n()))
+       summarize(Sum = mean(movement))
+              
    
-   ggplot(summary.time, aes(x = time, y = Sum, fill = time)) +
+  ggplot(summary.time, aes(x = time, y = Sum, fill = time)) +
      geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.9)) +
-     geom_errorbar(aes(ymin = Sum - SE, ymax = Sum + SE),
-                   width = 0.2, position = position_dodge(width = 0.9)) +
      labs(x = "time", y = "Total locomotion(px/s)") +
      ggtitle("Locomotion for time of day")
    
@@ -162,9 +172,9 @@ wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_e
               "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 
-yp.act <- GetAct(yp.csv, 48, 0.0003)
-sr.act <- GetAct(sr.csv, 48, 0.0003)
-wtbs.act <- GetAct(wtbs.csv, 48, 0.0003)
+yp.act <- GetAct(yp.csv, 48, 1)
+sr.act <- GetAct(sr.csv, 48, 1)
+wtbs.act <- GetAct(wtbs.csv, 48, 1)
 
 
 
