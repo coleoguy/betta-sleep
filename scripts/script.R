@@ -172,9 +172,9 @@ wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_e
               "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 
-yp.act <- GetAct(yp.csv, 48, 1)
-sr.act <- GetAct(sr.csv, 48, 1)
-wtbs.act <- GetAct(wtbs.csv, 48, 1)
+yp.act <- GetAct(yp.csv, 48, 0.2)
+sr.act <- GetAct(sr.csv, 48, 0.2)
+wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
 
 
 
