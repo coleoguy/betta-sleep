@@ -112,47 +112,85 @@ CountRest <- function(files, drift = 4.9, runlength = 60, reclen = 48, window = 
 }
 
 ## TODO measure diurnality and "crepuscularity"
-Crepuscularity <- function(files, reclen = 48, window = 0.0003) {
+Crepuscularity <- function(files, reclen = 48, window = 0.2) {
   # Get data for strain
   dat <- GetAct(files, reclen, window)
   # create df for data labeled by time
-  day.night <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
+  day.night <- data.frame(matrix(NA, ncol = 3, nrow = length(dat[,1])))
   colnames(day.night) <- c("time", "movement")
   # assign time for each second
-  day.night[,2] <- dat[,1]
+  #day.night[,2] <- dat[,1]
   
-  day.night[1:3333,1] <- "twilight"
-  day.night[63334:76666,1] <- "twilight"
-  day.night[103334:116666,1] <- "twilight"
-  day.night[143334:156666,1] <- "twilight"
-  day.night[1:23333,1] <- "day"
-  day.night[76667:103333,1] <- "day"
-  day.night[156667:160000,1] <- "day"
-  day.night[36667:63333,1] <- "night"
-  day.night[116667:143333,1] <- "night"
+  ##notes
+  # create final df, for day-night, and including twilight
+  day.night <- data.frame(matrix(NA, ncol = 3, nrow = length(dat[,1])))
+  colnames(day.night) <- c("time", "movement", "strain")
   
-  # day.night[23334:36666,1] <- "twilight"
-  # day.night[63334:76666,1] <- "twilight"
-  # day.night[103334:116666,1] <- "twilight"
-  # day.night[143334:156666,1] <- "twilight"
-  # day.night[1:23333,1] <- "day"
-  # day.night[76667:103333,1] <- "day"
-  # day.night[156667:160000,1] <- "day"
-  # day.night[36667:63333,1] <- "night"
-  # day.night[116667:143333,1] <- "night"
+  #get act
+  yp.act <- GetAct(yp.csv, 48, 0.2)
+  sr.act <- GetAct(sr.csv, 48, 0.2)
+  wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
+  #create day and night df
+  yp.dn <- data.frame(matrix(NA, ncol = 3, nrow = 240))
+  colnames(yp.dn) <- c("time", "movement", "strain")
+  yp.dn[,2] <- yp.act[,1]
+  sr.dn <- data.frame(matrix(NA, ncol = 3, nrow = 240))
+  colnames(sr.dn) <- c("time", "movement", "strain")
+  sr.dn[,2] <- sr.act[,1]
+  wtbs.dn <- data.frame(matrix(NA, ncol = 3, nrow = 240))
+  colnames(wtbs.dn) <- c("time", "movement", "strain")
+  wtbs.dn[,2] <- sr.act[,1]
+  # assign time and strain in dn.df
+  yp.dn[1:45,1] <- "day"
+  yp.dn[46:105,1] <- "night"
+  yp.dn[106:165,1] <- "day"
+  yp.dn[166:225,1] <- "night"
+  yp.dn[226:240,1] <- "day"
+  yp.dn[,3] <- "YellowPlakat"
+  sr.dn[1:45,1] <- "day"
+  sr.dn[46:105,1] <- "night"
+  sr.dn[106:165,1] <- "day"
+  sr.dn[166:225,1] <- "night"
+  sr.dn[226:240,1] <- "day"
+  sr.dn[,3] <- "SuperRed"
+  wtbs.dn[1:45,1] <- "day"
+  wtbs.dn[46:105,1] <- "night"
+  wtbs.dn[106:165,1] <- "day"
+  wtbs.dn[166:225,1] <- "night"
+  wtbs.dn[226:240,1] <- "day"
+  wtbs.dn[,3] <- "BettaSplendensWT"
+  #merge into day.night
   
-  # create summary df
-  summary.time <- day.night %>%
-       group_by(time) %>%
-       summarize(Sum = mean(movement))
-              
-   
-  ggplot(summary.time, aes(x = time, y = Sum, fill = time)) +
-     geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.9)) +
-     labs(x = "time", y = "Total locomotion(px/s)") +
-     ggtitle("Locomotion for time of day")
-   
-   
+  # 
+  yp.dnt[46:55,1] <- "twilight"
+  yp.dnt[106:115,1] <- "twilight"
+  yp.dnt[166:175,1] <- "twilight"
+  yp.dnt[226:235,1] <- "twilight"
+  sr.dnt[46:55,1] <- "twilight"
+  sr.dnt[106:115,1] <- "twilight"
+  sr.dnt[166:175,1] <- "twilight"
+  sr.dnt[226:235,1] <- "twilight"
+  wtbs.dnt[46:55,1] <- "twilight"
+  wtbs.dnt[106:115,1] <- "twilight"
+  wtbs.dnt[166:175,1] <- "twilight"
+  wtbs.dnt[226:235,1] <- "twilight"
+  
+  
+  minmax <- data.frame(matrix(NA, ncol = 4, nrow = 9))
+  colnames(minmax) <- c("min", "max", "time", "strain")
+  
+  minmax[7,2] <- max(wtbs.dnt[wtbs.dnt$time == "day", 2])
+  minmax[7,1] <- min(wtbs.dnt[wtbs.dnt$time == "day", 2])
+  minmax[7,3] <- "day"
+  minmax[7,4] <- "BettaSplendensWT"
+  
+  # read in the data as twilight
+  
+  
+  
+  fit <- glm(movement ~ time + strain, data=twilight)
+  summary(fit)
+  step(fit)
 }
 
 
@@ -166,10 +204,12 @@ yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv
             "../data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 sr.csv <- c("../data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-            "../data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
+            "../data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "../data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-              "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
+              "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+              "../data/WT")
 
 
 yp.act <- GetAct(yp.csv, 48, 0.2)
