@@ -174,7 +174,7 @@ Crepuscularity <- function(files, reclen = 48, window = 0.2) {
   wtbs.dnt[106:115,1] <- "twilight"
   wtbs.dnt[166:175,1] <- "twilight"
   wtbs.dnt[226:235,1] <- "twilight"
-  
+  twilight <- rbind(yp.dnt, sr.dnt, wtbs.dnt)
   
   minmax <- data.frame(matrix(NA, ncol = 4, nrow = 9))
   colnames(minmax) <- c("min", "max", "time", "strain")
