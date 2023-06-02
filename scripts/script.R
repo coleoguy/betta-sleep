@@ -10,6 +10,7 @@ GetMovement <- function(x, reclen, window, stat){
     dx <- x[1:(nrow(x)-1),1] - x[2:nrow(x),1]
     dy <- x[1:(nrow(x)-1),2] - x[2:nrow(x),2]
     d <- sqrt((dx^2)+(dy^2))
+    d <- d/2.1
     return(d)
   }
   
@@ -197,7 +198,6 @@ Crepuscularity <- function(files, reclen = 48, window = 0.2) {
 
 
 
-
 yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "../data/YP-03-04-apr04DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "../data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
@@ -209,7 +209,7 @@ sr.csv <- c("../data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv
 
 wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-              "../data/WT")
+              "../data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 
 
 yp.act <- GetAct(yp.csv, 48, 0.2)
