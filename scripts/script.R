@@ -78,16 +78,23 @@ CountRest <- function(files, drift = 2.4, runlength = 60, reclen = 48, window = 
   ## TODO turn into cm or mm per second
   bouts <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
   colnames(bouts) <- c("total", "mean")
+  
+  bouts <- c()
   for (i in 1:length(dat[,1])) {
-    sequences <- rle(dat[i,] < drift)
-    for (j in 1:length(sequences$lengths)) {
-      runs <- c()
-      runs <- sequences$lengths[sequences$lengths > runlength]
-    }
-    #lengths <- sequences$lengths
-    bouts[i,1] <- sum(runs)
-    bouts[i,2] <- mean(runs)
+    sequences <- rle(dat[i,] < 2.4)
+  #   for (j in 1:length(sequences$lengths)) {
+  #     runs <- c()
+  #     runs <- sequences$lengths[sequences$lengths > runlength]
+  #   }
+    
+    selected_bouts <- subset(sequences$lengths, sequences$lengths > 60 & sequences$values)
+  
+  #   #lengths <- sequences$lengths
+  #   bouts[i,1] <- sum(runs)
+  #   bouts[i,2] <- mean(runs)
+    bouts[[i]] <- sequences
   }
+  
   bouts[,1] <- (bouts/3600)/2
   return(bouts)
   
