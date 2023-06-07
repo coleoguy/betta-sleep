@@ -35,13 +35,25 @@ Act.Plot <- function(df, reclen, window) {
              alpha = .2,fill = "gray5")
 }
 
-# Plot activity with rest bouts (R)
+## Plot activity with rest bouts (R)
+# Yellow Plakat
 plot(yp.dat$activity~yp.dat$time, type="l", ylim=c(-5,max(yp.dat$activity)))
 stdsz <- max(yp.dat$bouts)/1.5
 for(i in 1:nrow(yp.dat)){
   points(x=yp.dat$time[i], y=5, cex=yp.dat$bouts[i]/stdsz, pch="|")
 }
-
+# Super Red
+plot(sr.dat$activity~sr.dat$time, type="l", ylim=c(-5,max(sr.dat$activity)))
+stdsz <- max(sr.dat$bouts)/1.5
+for(i in 1:nrow(sr.dat)){
+  points(x=sr.dat$time[i], y=5, cex=sr.dat$bouts[i]/stdsz, pch="|")
+}
+# Wild-Type (Betta Splendens)
+plot(wtbs.dat$activity~wtbs.dat$time, type="l", ylim=c(-5,max(wtbs.dat$activity)))
+stdsz <- max(wtbs.dat$bouts)/1.5
+for(i in 1:nrow(wtbs.dat)){
+  points(x=wtbs.dat$time[i], y=5, cex=wtbs.dat$bouts[i]/stdsz, pch="|")
+}
 
 
 ###### In development #####

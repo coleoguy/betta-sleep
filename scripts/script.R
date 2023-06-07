@@ -69,7 +69,7 @@ GetAct <- function(files, reclen, window){
   
   return(df)
 }
-CountRest <- function(files, drift = 2.4, runlength = 60, reclen = 48, window = 0.0003) {
+CountRest <- function(files, drift = 2.4, reclen = 48, window = 0.0003) {
 
   dat <- GetData(files, reclen, window)
   bouts <- c()
@@ -85,7 +85,7 @@ GetResults <- function(act, rbouts){
   dat$bouts <- 0
   for(j in 1:length(rbouts)){
     foo <- rbouts[[j]]
-    point.sb <- (cumsum(foo[[1]]) * 1.06666667)[which(foo[[1]] > 60 & foo[[2]])]
+    point.sb <- (cumsum(foo[[1]]) * 1.06666667)[which(foo[[1]] > 90 & foo[[2]])]
     point.sb <- point.sb/60/60
     for(i in 2:nrow(dat)){
       sleeps <- sum(point.sb < dat$time[i] & point.sb > dat$time[i-1])
