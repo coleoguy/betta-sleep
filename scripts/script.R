@@ -3,8 +3,8 @@
 
 library(tidyr)
 library(dplyr)
-library(ggplot2)
 
+# Functions
 GetMovement <- function(x, reclen, window, stat){
   Displacement <- function(x){
     dx <- x[1:(nrow(x)-1),1] - x[2:nrow(x),1]
@@ -70,41 +70,32 @@ GetAct <- function(files, reclen, window){
   return(df)
 }
 CountRest <- function(files, drift = 2.4, runlength = 60, reclen = 48, window = 0.0003) {
-  # Drift = 4.9 is a good value for pixels per second
-  # Drift = 2.4 is a good value for mm/second
-  
-  # Gest data in "dat" for roughly every second
+
   dat <- GetData(files, reclen, window)
-  ## TODO turn into cm or mm per second
-  bouts <- data.frame(matrix(NA, ncol = 2, nrow = length(dat[,1])))
-  colnames(bouts) <- c("total", "mean")
-  
   bouts <- c()
   for (i in 1:length(dat[,1])) {
-    sequences <- rle(dat[i,] < 2.4)
-  #   for (j in 1:length(sequences$lengths)) {
-  #     runs <- c()
-  #     runs <- sequences$lengths[sequences$lengths > runlength]
-  #   }
-    
-    selected_bouts <- subset(sequences$lengths, sequences$lengths > 60 & sequences$values)
-  
-  #   #lengths <- sequences$lengths
-  #   bouts[i,1] <- sum(runs)
-  #   bouts[i,2] <- mean(runs)
+    sequences <- rle(dat[i,] < drift)
     bouts[[i]] <- sequences
   }
-  
-  bouts[,1] <- (bouts/3600)/2
   return(bouts)
-  
-  ## TODO
-  ## Capture the index of the rest bouts and find a way to include
-  ## them in any locomotion plot
-  
-  
 }
-
+GetResults <- function(act, rbouts){
+  dat <- act
+  dat$time <- round(seq(from=0, to=48, length.out=240), 2)
+  dat$bouts <- 0
+  for(j in 1:length(rbouts)){
+    foo <- rbouts[[j]]
+    point.sb <- (cumsum(foo[[1]]) * 1.06666667)[which(foo[[1]] > 60 & foo[[2]])]
+    point.sb <- point.sb/60/60
+    for(i in 2:nrow(dat)){
+      sleeps <- sum(point.sb < dat$time[i] & point.sb > dat$time[i-1])
+      if(sleeps > 0){
+        dat$bouts[i] <- sleeps + dat$bouts[i]
+      }
+    }
+  }
+  return(dat)
+}
 ## TODO measure diurnality and "crepuscularity"
 Crepuscularity <- function(files, reclen = 48, window = 0.2) {
   # Get data for strain
@@ -197,93 +188,31 @@ Crepuscularity <- function(files, reclen = 48, window = 0.2) {
 }
 
 
+### Data Analysis ###
 
-
-
-yp.csv <- c("../data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-            "../data/YP-03-04-apr04DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-            "../data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-            "../data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
-
-sr.csv <- c("../data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-            "../data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-            "../data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
-
-wtbs.csv <- c("../data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-              "../data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-              "../data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
-
-
+# Yellow Plakat
+yp.csv <- c("data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "data/YP-03-04-apr04DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 yp.act <- GetAct(yp.csv, 48, 0.2)
+yp.rest <- CountRest(yp.csv)
+yp.dat <- GetResults(yp.act, yp.rest)
+
+#Super Red
+sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+            "data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 sr.act <- GetAct(sr.csv, 48, 0.2)
+sr.rest <- CountRest(sr.csv)
+sr.dat <- GetResults(sr.act, sr.rest)
+
+# Wild-Type (Betta Splendens)
+wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+              "data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+              "data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
+wtbs.rest <- CountRest(wtbs.csv)
+wtbs.dat <- GetResults(wtbs.act, wtbs.rest)
 
 
-
-## PLOTTING
-
-# Plot locomotion through time
-Act.Plot <- function(df, reclen, window) {
-  ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
-                                panel.grid.minor = element_blank(),
-                                panel.background = element_blank(),
-                                panel.border=element_blank(),
-                                axis.line = element_line(colour="grey30"),
-                                axis.title = element_text(colour="grey20"),
-                                axis.text = (element_text(colour="grey30")),
-                                legend.title = element_text(colour="grey20"),
-                                legend.text = element_text(colour="grey30"))
-  
-  bins <- reclen/window
-  ggplot(df, aes(x = 1:bins, y = activity)) + 
-    ggtheme +
-    geom_line(col="black") + 
-    geom_point() + 
-    geom_ribbon(aes(ymin = lower, ymax = upper), 
-                alpha=0.1, 
-                linetype="dashed",
-                color="grey") +
-    annotate("rect", xmin = 9/window, xmax = 21/window, ymin = -1, ymax = max(df),
-             alpha = .2,fill = "gray5") +
-    annotate("rect", xmin = 33/window, xmax = 45/window, ymin = -1, ymax = max(df),
-             alpha = .2,fill = "gray5")
-}
-
-# Plot day.night distributions
-ggplot(day.night, aes(x=movement, color=time)) +
-  ggtheme +
-  geom_histogram(fill='white', alpha=0.5, position = 'identity') +
-  xlim(0,10)
-
-# Plot run-lengths 
-plot(lengths, ylim = c(0,100))
-abline(h = 60, col = "purple")
-abline(h = 30, col = "blue")
-abline(h = 20, col = "red")
-
-# Plotting rest bouts
-##Bout.plot
-combined_df <- data.frame(cbind(yp.rest$mean, sr.rest$mean, wtbs.rest$mean))
-colnames(combined_df) <- c("yellow plakat", "superRed", "WT")
-group_colors <- c("superRed" = "red", "WT" = "green", "yellow plakat" = "yellow")
-df_long <- tidyr::gather(combined_df, key = "Group", value = "Values")
-summary_df <- df_long %>%
-  group_by(Group) %>%
-  summarize(Mean = mean(Values),
-            SE = sd(Values) / sqrt(length(Values)))
-
-ggplot(df_long, aes(x = Group, y = Values, fill = Group)) +
-  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = group_colors, fill = group_colors) +
-  geom_jitter(position = position_dodge(width = 0.9)) +
-  #geom_errorbar(data = summary_df, aes(ymin = (Mean - SE), ymax = (Mean + SE)),
-  #              width = 0.2, position = position_dodge(width = 0.9), color = "black") +
-  labs(x = "Strain", y = "mean length in seconds") +
-  ggtitle("mean length of rest bouts")
-
-ggplot(df_long, aes(x = Group, y = Values, fill = Group)) +
-  geom_violin() +
-  scale_fill_manual(values = group_colors) +
-  labs(x = "strain", y = "Hours of rest") +
-  ggtitle("Hours of rest per day")
-
-    
