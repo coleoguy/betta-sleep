@@ -37,22 +37,22 @@ Act.Plot <- function(df, reclen, window) {
 
 ## Plot activity with rest bouts (R)
 # Yellow Plakat
-plot(yp.dat$activity~yp.dat$time, type="l", ylim=c(-5,max(yp.dat$activity)))
+plot((yp.dat$activity/12)~yp.dat$time, type="l", col = "#ffb301", ylim=c(-5,max(yp.dat$activity/12)))
 stdsz <- max(yp.dat$bouts)/1.5
 for(i in 1:nrow(yp.dat)){
-  points(x=yp.dat$time[i], y=5, cex=yp.dat$bouts[i]/stdsz, pch="|")
+  points(x=yp.dat$time[i], y=0, cex=yp.dat$bouts[i]/stdsz, pch="|")
 }
 # Super Red
-plot(sr.dat$activity~sr.dat$time, type="l", ylim=c(-5,max(sr.dat$activity)))
+plot((sr.dat$activity/12)~sr.dat$time, type="l", col = "#cc0000", ylim=c(-5,max(sr.dat$activity/12)))
 stdsz <- max(sr.dat$bouts)/1.5
 for(i in 1:nrow(sr.dat)){
-  points(x=sr.dat$time[i], y=5, cex=sr.dat$bouts[i]/stdsz, pch="|")
+  points(x=sr.dat$time[i], y=0, cex=sr.dat$bouts[i]/stdsz, pch="|")
 }
 # Wild-Type (Betta Splendens)
-plot(wtbs.dat$activity~wtbs.dat$time, type="l", ylim=c(-5,max(wtbs.dat$activity)))
+plot((wtbs.dat$activity/12)~wtbs.dat$time, type="l", col = "#77aa22", ylim=c(-5,max(wtbs.dat$activity/12)))
 stdsz <- max(wtbs.dat$bouts)/1.5
 for(i in 1:nrow(wtbs.dat)){
-  points(x=wtbs.dat$time[i], y=5, cex=wtbs.dat$bouts[i]/stdsz, pch="|")
+  points(x=wtbs.dat$time[i], y=0, cex=wtbs.dat$bouts[i]/stdsz, pch="|")
 }
 
 
