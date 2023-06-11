@@ -2,7 +2,7 @@
 # 03/27/2023
 
 library(tidyr)
-library(dplyr)
+#library(dplyr)
 
 # Functions
 GetMovement <- function(x, reclen, window, stat){
@@ -10,7 +10,8 @@ GetMovement <- function(x, reclen, window, stat){
     dx <- x[1:(nrow(x)-1),1] - x[2:nrow(x),1]
     dy <- x[1:(nrow(x)-1),2] - x[2:nrow(x),2]
     d <- sqrt((dx^2)+(dy^2))
-    d <- d/2.1
+    # Tanks are 30.5cm each (1 ft, 61cm total width), videos are 640 pixels wide
+    d <- d*(61/640)
     return(d)
   }
   
@@ -69,9 +70,10 @@ GetAct <- function(files, reclen, window){
   
   return(df)
 }
-CountRest <- function(files, drift = 2.4, reclen = 48, window = 0.0003) {
+CountRest <- function(files, drift = 5.1, reclen = 48, window = 0.0003) {
 
   dat <- GetData(files, reclen, window)
+  drift <- drift**(61/640)
   bouts <- c()
   for (i in 1:length(dat[,1])) {
     sequences <- rle(dat[i,] < drift)
@@ -85,7 +87,7 @@ GetResults <- function(act, rbouts){
   dat$bouts <- 0
   for(j in 1:length(rbouts)){
     foo <- rbouts[[j]]
-    point.sb <- (cumsum(foo[[1]]) * 1.06666667)[which(foo[[1]] > 90 & foo[[2]])]
+    point.sb <- (cumsum(foo[[1]]) * 1.06666667)[which(foo[[1]] > 120 & foo[[2]])]
     point.sb <- point.sb/60/60
     for(i in 2:nrow(dat)){
       sleeps <- sum(point.sb < dat$time[i] & point.sb > dat$time[i-1])
@@ -98,19 +100,6 @@ GetResults <- function(act, rbouts){
 }
 ## TODO measure diurnality and "crepuscularity"
 Crepuscularity <- function(files, reclen = 48, window = 0.2) {
-  # Get data for strain
-  dat <- GetAct(files, reclen, window)
-  # create df for data labeled by time
-  day.night <- data.frame(matrix(NA, ncol = 3, nrow = length(dat[,1])))
-  colnames(day.night) <- c("time", "movement")
-  # assign time for each second
-  #day.night[,2] <- dat[,1]
-  
-  ##notes
-  # create final df, for day-night, and including twilight
-  day.night <- data.frame(matrix(NA, ncol = 3, nrow = length(dat[,1])))
-  colnames(day.night) <- c("time", "movement", "strain")
-  
   #get act
   yp.act <- GetAct(yp.csv, 48, 0.2)
   sr.act <- GetAct(sr.csv, 48, 0.2)
