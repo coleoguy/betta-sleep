@@ -70,10 +70,10 @@ GetAct <- function(files, reclen, window){
   
   return(df)
 }
-CountRest <- function(files, drift = 5.1, reclen = 48, window = 0.0003) {
+CountRest <- function(files, drift = 4.5, reclen = 48, window = 0.0003) {
 
   dat <- GetData(files, reclen, window)
-  drift <- drift**(61/640)
+  drift <- drift*(61/640)
   bouts <- c()
   for (i in 1:length(dat[,1])) {
     sequences <- rle(dat[i,] < drift)
@@ -81,8 +81,9 @@ CountRest <- function(files, drift = 5.1, reclen = 48, window = 0.0003) {
   }
   return(bouts)
 }
-GetResults <- function(act, rbouts){
+GetBouts <- function(files){
   dat <- act
+  rbouts <- CountRest(files)
   dat$time <- round(seq(from=0, to=48, length.out=240), 2)
   dat$bouts <- 0
   for(j in 1:length(rbouts)){
@@ -99,6 +100,18 @@ GetResults <- function(act, rbouts){
   return(dat)
 }
 ## TODO measure diurnality and "crepuscularity"
+GetTimed <- function(files, reclen = 48, window = 0.2) {
+  
+  dat <- GetData(files, reclen, window)
+  df <- data.frame(matrix(NA, nrow = length(dat[,1]), ncol = 3))
+  colnames(df) <- c("day", "twilight", "night")
+  for (i in 1:length(dat[,1])) {
+    df[i,1] <- mean(dat[i,c(1:45,116:165,236:240)])
+    df[i,2] <- mean(dat[i,c(46:55,106:115,166:175,226:235)])
+    df[i,3] <- mean(dat[i,c(56:105,176:225)])
+  }
+  return(df)
+}
 Crepuscularity <- function(files, reclen = 48, window = 0.2) {
   #get act
   yp.act <- GetAct(yp.csv, 48, 0.2)
@@ -155,6 +168,8 @@ Crepuscularity <- function(files, reclen = 48, window = 0.2) {
   wtbs.dnt[166:175,1] <- "twilight"
   wtbs.dnt[226:235,1] <- "twilight"
   twilight <- rbind(yp.dnt, sr.dnt, wtbs.dnt)
+  #turn by 12min to by minute
+  twilight$movement <- twilight$movement/12
   
   # trying to find the crepuscularity metric
   crepuscularity <- data.frame(matrix(NA, ncol = 5, nrow = 9))
@@ -185,23 +200,22 @@ yp.csv <- c("data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 yp.act <- GetAct(yp.csv, 48, 0.2)
-yp.rest <- CountRest(yp.csv)
-yp.dat <- GetResults(yp.act, yp.rest)
+yp.rest <- GetBouts(yp.csv)
 
 #Super Red
 sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 sr.act <- GetAct(sr.csv, 48, 0.2)
-sr.rest <- CountRest(sr.csv)
-sr.dat <- GetResults(sr.act, sr.rest)
+sr.rest <- GetBouts(sr.csv)
 
 # Wild-Type (Betta Splendens)
 wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
-              "data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
+              "data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
+              "data/WT-BS-07-08-apr28DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
-wtbs.rest <- CountRest(wtbs.csv)
-wtbs.dat <- GetResults(wtbs.act, wtbs.rest)
+wtbs.rest <- GetBouts(wtbs.csv)
+
 
 
