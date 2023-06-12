@@ -70,9 +70,12 @@ rect(xleft = 9, ybottom = -5, xright = 21, ytop = 90, col = adjustcolor("gray", 
 rect(xleft = 33, ybottom = -5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
 axis(side = 1, at = c(0:239), labels = ZT)
 
-## Plot GLM results
+## Dot Plot
 
-
+plot(1, type = "n", xlim = c(1, ncol(df)), ylim = c(0, max(df)), xlab = "Group", ylab = "Value")
+for (i in 1:ncol(df)) {
+  points(rep(i, nrow(df)), df[, i], pch = 16)
+}
 
 ###### In development #####
 
