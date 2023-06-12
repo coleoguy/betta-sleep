@@ -37,22 +37,30 @@ Act.Plot <- function(df, reclen, window) {
 
 ## Plot activity with rest bouts (R)
 # Yellow Plakat
-plot((yp.dat$activity/12)~yp.dat$time, type="l", col = "#ffb301", ylim=c(-5,max(yp.dat$activity/12)))
+plot((yp.dat$activity/12)~yp.dat$time, type="l", col = "#ffb301", ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
 stdsz <- max(yp.dat$bouts)/1.5
 for(i in 1:nrow(yp.dat)){
   points(x=yp.dat$time[i], y=0, cex=yp.dat$bouts[i]/stdsz, pch="|")
 }
+rect(xleft = 9, ybottom = -5, xright = 21, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+rect(xleft = 33, ybottom = -5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+##axis(side = 1, at = c(1:240), labels = rep(1:120, each=2)+2)
 # Super Red
-plot((sr.dat$activity/12)~sr.dat$time, type="l", col = "#cc0000", ylim=c(-5,max(sr.dat$activity/12)))
+plot((sr.dat$activity/12)~sr.dat$time, type="l", col = "#cc0000", ylim=c(-5,90), xlab = "ZT", ylab = "Locomotion (cm min-1)")
 stdsz <- max(sr.dat$bouts)/1.5
 for(i in 1:nrow(sr.dat)){
   points(x=sr.dat$time[i], y=0, cex=sr.dat$bouts[i]/stdsz, pch="|")
 }
+rect(xleft = 9, ybottom = 5, xright = 21, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+rect(xleft = 33, ybottom = 5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
 # Wild-Type (Betta Splendens)
-plot((wtbs.dat$activity/12)~wtbs.dat$time, type="l", col = "#77aa22", ylim=c(-5,max(wtbs.dat$activity/12)))
+plot((wtbs.dat$activity/12)~wtbs.dat$time, type="l", col = "#77aa22", ylim=c(-5,90), xlab = "ZT", ylab = "Locomotion (cm min-1)")
 stdsz <- max(wtbs.dat$bouts)/1.5
 for(i in 1:nrow(wtbs.dat)){
   points(x=wtbs.dat$time[i], y=0, cex=wtbs.dat$bouts[i]/stdsz, pch="|")
+}
+rect(xleft = 9, ybottom = 5, xright = 21, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+rect(xleft = 33, ybottom = 5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
 }
 
 
