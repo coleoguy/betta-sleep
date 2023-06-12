@@ -2,7 +2,6 @@
 # 03/27/2023
 
 library(tidyr)
-#library(dplyr)
 
 # Functions
 GetMovement <- function(x, reclen, window, stat){
@@ -99,7 +98,6 @@ GetBouts <- function(files){
   }
   return(dat)
 }
-## TODO measure diurnality and "crepuscularity"
 GetTimed <- function(files, reclen = 48, window = 0.2) {
   
   dat <- GetData(files, reclen, window)
@@ -112,6 +110,7 @@ GetTimed <- function(files, reclen = 48, window = 0.2) {
   }
   return(df)
 }
+## TODO measure diurnality and "crepuscularity"
 Crepuscularity <- function(files, reclen = 48, window = 0.2) {
   #get act
   yp.act <- GetAct(yp.csv, 48, 0.2)
@@ -201,6 +200,7 @@ yp.csv <- c("data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 yp.act <- GetAct(yp.csv, 48, 0.2)
 yp.rest <- GetBouts(yp.csv)
+yp.timed <- GetTimed(yp.csv)
 
 #Super Red
 sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
@@ -208,6 +208,7 @@ sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 sr.act <- GetAct(sr.csv, 48, 0.2)
 sr.rest <- GetBouts(sr.csv)
+sr.timed <- GetTimed(sr.csv)
 
 # Wild-Type (Betta Splendens)
 wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
@@ -216,6 +217,6 @@ wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.c
               "data/WT-BS-07-08-apr28DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
 wtbs.rest <- GetBouts(wtbs.csv)
-
+wtbs.timed <- GetTimed(wtbs.csv)
 
 
