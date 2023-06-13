@@ -16,6 +16,67 @@ ggtheme <- theme_bw() + theme(panel.grid.major = element_blank(),
                               legend.title = element_text(colour="grey20"),
                               legend.text = element_text(colour="grey30"))
 
+
+## Plot activity with rest bouts (R)
+#ZT axis
+ZT <- rep(seq(0, 23), times = 10)
+ZT <- ZT[-1]
+ZT <- ZT[-1]
+ZT <- ZT[-1]
+ZT <- c(ZT,0,1,2)
+# Yellow Plakat
+plot((yp.rest$activity/12)~yp.rest$time, type="l", col = "#ffb301", lwd = 2, ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
+stdsz <- max(yp.rest$bouts)/2
+for(i in 1:nrow(yp.rest)){
+  points(x=yp.rest$time[i], y=0, cex=yp.rest$bouts[i]/stdsz, pch="|")
+}
+rect(xleft = 9, ybottom = -10, xright = 21, ytop = 95, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+rect(xleft = 33, ybottom = -10, xright = 45, ytop = 95, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+axis(side = 1, at = c(0:239), labels = ZT)
+# Super Red
+plot((sr.rest$activity/12)~sr.rest$time, type="l", col = "#cc0000", lwd = 2, ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
+stdsz <- max(sr.rest$bouts)/2
+for(i in 1:nrow(sr.rest)){
+  points(x=sr.rest$time[i], y=0, cex=sr.rest$bouts[i]/stdsz, pch="|")
+}
+rect(xleft = 9, ybottom = -10, xright = 21, ytop = 95, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+rect(xleft = 33, ybottom = -10, xright = 45, ytop = 95, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+axis(side = 1, at = c(0:239), labels = ZT)
+# Wild-Type (Betta Splendens)
+plot((wtbs.rest$activity/12)~wtbs.rest$time, type="l", col = "#77aa22", lwd = 2, ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
+stdsz <- max(wtbs.rest$bouts)/2
+for(i in 1:nrow(wtbs.rest)){
+  points(x=wtbs.rest$time[i], y=0, cex=wtbs.rest$bouts[i]/stdsz, pch="|")
+}
+rect(xleft = 9, ybottom = -10, xright = 21, ytop = 95, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+rect(xleft = 33, ybottom = -10, xright = 45, ytop = 95, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
+axis(side = 1, at = c(0:239), labels = ZT)
+
+## Dot Plot
+
+plot(1, type = "n", xlim = c(1, ncol(df)), ylim = c(0, max(df)), xlab = "Group", ylab = "Value")
+for (i in 1:ncol(df)) {
+  points(rep(i, nrow(df)), df[, i], pch = 16)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###### In development #####
+
 # Plot activity with confidence intervals
 ## TODO Turn from function to script
 Act.Plot <- function(df, reclen, window) {
@@ -34,50 +95,6 @@ Act.Plot <- function(df, reclen, window) {
     annotate("rect", xmin = 33/window, xmax = 45/window, ymin = -1, ymax = max(df),
              alpha = .2,fill = "gray5")
 }
-
-## Plot activity with rest bouts (R)
-#ZT axis
-ZT <- rep(seq(0, 23), times = 10)
-ZT <- ZT[-1]
-ZT <- ZT[-1]
-ZT <- ZT[-1]
-ZT <- c(ZT,0,1,2)
-# Yellow Plakat
-plot((yp.dat$activity/12)~yp.dat$time, type="l", col = "#ffb301", ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
-stdsz <- max(yp.dat$bouts)/1.5
-for(i in 1:nrow(yp.dat)){
-  points(x=yp.dat$time[i], y=0, cex=yp.dat$bouts[i]/stdsz, pch="|")
-}
-rect(xleft = 9, ybottom = -5, xright = 21, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
-rect(xleft = 33, ybottom = -5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
-axis(side = 1, at = c(0:239), labels = ZT)
-# Super Red
-plot((sr.dat$activity/12)~sr.dat$time, type="l", col = "#cc0000", ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
-stdsz <- max(sr.dat$bouts)/1.5
-for(i in 1:nrow(sr.dat)){
-  points(x=sr.dat$time[i], y=0, cex=sr.dat$bouts[i]/stdsz, pch="|")
-}
-rect(xleft = 9, ybottom = -5, xright = 21, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
-rect(xleft = 33, ybottom = -5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
-axis(side = 1, at = c(0:239), labels = ZT)
-# Wild-Type (Betta Splendens)
-plot((wtbs.dat$activity/12)~wtbs.dat$time, type="l", col = "#77aa22", ylim=c(-5,90), xaxt = "n", xlab = "ZT", ylab = "Locomotion (cm min-1)")
-stdsz <- max(wtbs.dat$bouts)/1.5
-for(i in 1:nrow(wtbs.dat)){
-  points(x=wtbs.dat$time[i], y=0, cex=wtbs.dat$bouts[i]/stdsz, pch="|")
-}
-rect(xleft = 9, ybottom = -5, xright = 21, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
-rect(xleft = 33, ybottom = -5, xright = 45, ytop = 90, col = adjustcolor("gray", alpha.f = 0.3), border = NA)
-axis(side = 1, at = c(0:239), labels = ZT)
-
-## Dot Plot
-
-plot(1, type = "n", xlim = c(1, ncol(df)), ylim = c(0, max(df)), xlab = "Group", ylab = "Value")
-for (i in 1:ncol(df)) {
-  points(rep(i, nrow(df)), df[, i], pch = 16)
-}
-
-###### In development #####
 
 
 # Plot day.night distributions
