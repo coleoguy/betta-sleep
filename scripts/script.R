@@ -80,7 +80,7 @@ CountRest <- function(files, drift = 4.5, reclen = 48, window = 0.0003) {
   }
   return(bouts)
 }
-GetBouts <- function(files){
+GetBouts <- function(files, act){
   dat <- act
   rbouts <- CountRest(files)
   dat$time <- round(seq(from=0, to=48, length.out=240), 2)
@@ -199,7 +199,7 @@ yp.csv <- c("data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 yp.act <- GetAct(yp.csv, 48, 0.2)
-yp.rest <- GetBouts(yp.csv)
+yp.rest <- GetBouts(yp.csv, yp.act)
 yp.timed <- GetTimed(yp.csv)
 
 #Super Red
@@ -207,7 +207,7 @@ sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 sr.act <- GetAct(sr.csv, 48, 0.2)
-sr.rest <- GetBouts(sr.csv)
+sr.rest <- GetBouts(sr.csv, sr.act)
 sr.timed <- GetTimed(sr.csv)
 
 # Wild-Type (Betta Splendens)
@@ -216,7 +216,7 @@ wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.c
               "data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "data/WT-BS-07-08-apr28DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
 wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
-wtbs.rest <- GetBouts(wtbs.csv)
+wtbs.rest <- GetBouts(wtbs.csv, wtbs.act)
 wtbs.timed <- GetTimed(wtbs.csv)
 
 
