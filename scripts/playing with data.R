@@ -1,27 +1,15 @@
 
-yp_bouts <- readRDS("~/Desktop/betta/yp_bouts.rds")
-yp <- read.csv("../results/yp_act.csv")[,-1]
-yp$time <- round(seq(from=0, to=48, length.out=240), 2)
-yp$bouts <- 0
-
-for(j in 1:length(yp_bouts)){
-  foo <- yp_bouts[[j]]
-  point.sb <- (cumsum(foo[[1]]) * 1.06666667)[which(foo[[1]] > 60 & foo[[2]])]
-  point.sb <- point.sb/60/60
-  for(i in 2:nrow(yp)){
-    sleeps <- sum(point.sb < yp$time[i] & point.sb > yp$time[i-1])
-    if(sleeps > 0){
-      yp$bouts[i] <- sleeps + yp$bouts[i]
-    }
-  }
-}
-
-plot(yp$activity~yp$time, type="l", ylim=c(-5,max(yp$activity)))
-stdsz <- max(yp$bouts)/1.5
-for(i in 1:nrow(yp)){
-  points(x=yp$time[i], y=5, cex=yp$bouts[i]/stdsz, pch="|")
-}
-
-
-
+library(ggplot2)
+dat <- rbind(read.csv("yp.csv"), read.csv("sr.csv"), read.csv("wtbs.csv"))[,-1]
+dat$strains <- as.factor(c(rep("yellow plakat", 8), rep("super red", 6), rep("wild-type", 8)))
+dat <- data.frame(c(dat$day,dat$twilight,dat$night),
+                  c(factor(rep(c("day","twilight","night"), each=22))),
+                  c(rep(dat$strains, times=3)))
+colnames(dat) <- c("activity", "time", "strain")
+dat$time <- factor(dat$time, levels = c("day","twilight","night"))
+ggplot(dat, aes(x=strain,y=activity, color=time)) +
+  geom_dotplot(binaxis = "y",stackdir = "center",position="dodge") +
+  theme_bw() +
+  scale_fill_manual(breaks = c("day", "twilight", "night"), 
+                    values=c("red", "blue", "green"))
 
