@@ -8,6 +8,7 @@ dat <- data.frame(c(dat$day,dat$twilight,dat$night),
                   c(rep(dat$strains, times=3)))
 colnames(dat) <- c("Locomotion", "Time", "Strain")
 dat$Time <- factor(dat$Time, levels = c("Day","Twilight","Night"))
+dat$Locomotion <- dat$Locomotion/12
 
 
 ggplot(dat, aes(x=Strain,y=Locomotion, fill=Time)) +
