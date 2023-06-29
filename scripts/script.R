@@ -110,8 +110,8 @@ GetTimed <- function(files, reclen = 48, window = 0.2) {
   }
   return(df)
 }
-## TODO measure diurnality and "crepuscularity"
-Crepuscularity <- function(files, reclen = 48, window = 0.2) {
+## TODO turn into function that can be run modular
+TimedAct <- function(files, reclen = 48, window = 0.2) {
   #get act
   yp.act <- GetAct(yp.csv, 48, 0.2)
   sr.act <- GetAct(sr.csv, 48, 0.2)
