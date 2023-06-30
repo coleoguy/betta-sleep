@@ -75,8 +75,12 @@ ggplot(dat, aes(x=Strain,y=Locomotion, fill=Time)) +
 
 
 ##Ternary Plot
-TernaryPlot()
-TernaryPoints()
+df <- rbind(yp.score, sr.score, wtbs.score)
+cols <- c(rgb(0.8,0.1,0.1), rgb(0.1,0.8,0.1), rgb(0.8,0.8,0.1))[as.factor(df$strain)]
+TernaryPlot(atip = "Diurnality", btip = "Crepuscularity", ctip = "Nocturnality",
+            alab = "Diurnality", blab = "Crepuscularity", clab = "Nocturnality")
+TernaryPoints(df[1:3], col = cols)
+
 
 
 

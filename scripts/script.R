@@ -114,7 +114,7 @@ Crepuscularity <- function(files, strain, reclen = 48, window = 0.2 ) {
   dat <- GetData(files, reclen, window)
   
   df <- data.frame(matrix(NA, nrow = length(dat[,1]), ncol = 4))
-  colnames(df) <- c("day", "twilight", "night")
+  colnames(df) <- c("day", "twilight", "night", "strain")
   
   for (i in 1:length(dat[,1])) {
     df[i,1] <- sum(dat[i,c(1:45,116:165,236:240)])/sum(dat[i,])
@@ -225,6 +225,7 @@ sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
 sr.act <- GetAct(sr.csv, 48, 0.2)
 sr.rest <- GetBouts(sr.csv, sr.act)
 sr.timed <- GetTimed(sr.csv)
+sr.score <- Crepuscularity(sr.csv, "Super Red")
 
 # Wild-Type (Betta Splendens)
 wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
@@ -234,5 +235,6 @@ wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.c
 wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
 wtbs.rest <- GetBouts(wtbs.csv, wtbs.act)
 wtbs.timed <- GetTimed(wtbs.csv)
+wtbs.score <- Crepuscularity(wtbs.csv, "Wild-Type")
 
 
