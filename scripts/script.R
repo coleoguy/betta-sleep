@@ -32,7 +32,7 @@ GetMovement <- function(x, reclen, window, stat){
   }
   return(movement)
 }
-GetData <- function(files, reclen, window){
+GetData <- function(files, reclen = 48, window = 0.2){
   
   bins <- reclen/window
   dat <- matrix(NA, (length(files)*2), bins)
@@ -54,9 +54,8 @@ GetData <- function(files, reclen, window){
   }
   return(dat)
 }
-GetAct <- function(files, reclen, window){
-  
-  dat <- GetData(files, reclen, window)
+GetAct <- function(dat, reclen = 48, window = 0.2){
+
   bins <- reclen/window
   upper <- lower <- c()
   for(i in 1:bins){
@@ -98,7 +97,7 @@ GetBouts <- function(files, act){
   }
   return(dat)
 }
-GetTimed <- function(files, reclen = 48, window = 0.2) {
+GetTimed <- function(dat, reclen = 48, window = 0.2) {
   
   dat <- GetData(files, reclen, window)
   df <- data.frame(matrix(NA, nrow = length(dat[,1]), ncol = 3))
@@ -110,8 +109,7 @@ GetTimed <- function(files, reclen = 48, window = 0.2) {
   }
   return(df)
 }
-Crepuscularity <- function(files, strain, reclen = 48, window = 0.2 ) {
-  dat <- GetData(files, reclen, window)
+Crepuscularity <- function(dat, strain, reclen = 48, window = 0.2 ) {
   
   df <- data.frame(matrix(NA, nrow = length(dat[,1]), ncol = 4))
   colnames(df) <- c("day", "twilight", "night", "strain")
@@ -213,28 +211,31 @@ yp.csv <- c("data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/YP-03-04-apr04DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/YP-05-06-apr07DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/Yp-07-08-apr11DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
-yp.act <- GetAct(yp.csv, 48, 0.2)
+yp.dat <- GetData(yp.csv)
+yp.act <- GetAct(yp.dat)
 yp.rest <- GetBouts(yp.csv, yp.act)
-yp.timed <- GetTimed(yp.csv)
-yp.score <- Crepuscularity(yp.csv, "Yellow Plakat")
+yp.timed <- GetTimed(yp.dat)
+yp.score <- Crepuscularity(yp.dat, "Yellow Plakat")
 
 #Super Red
 sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-03-04-May26DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
             "data/SR-05-06-May30DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
-sr.act <- GetAct(sr.csv, 48, 0.2)
+sr.dat <- GetData(sr.csv)
+sr.act <- GetAct(sr.dat)
 sr.rest <- GetBouts(sr.csv, sr.act)
-sr.timed <- GetTimed(sr.csv)
-sr.score <- Crepuscularity(sr.csv, "Super Red")
+sr.timed <- GetTimed(sr.dat)
+sr.score <- Crepuscularity(sr.dat, "Super Red")
 
 # Wild-Type (Betta Splendens)
 wtbs.csv <- c("data/WT-BS-01-02-may19DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "data/WT-BS-03-04-apr18DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "data/WT-BS-05-06-apr21DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
               "data/WT-BS-07-08-apr28DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv")
-wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
+wtbs.dat <- GetData(wtbs.csv)
+wtbs.act <- GetAct(wtbs.dat)
 wtbs.rest <- GetBouts(wtbs.csv, wtbs.act)
-wtbs.timed <- GetTimed(wtbs.csv)
-wtbs.score <- Crepuscularity(wtbs.csv, "Wild-Type")
+wtbs.timed <- GetTimed(wtbs.dat)
+wtbs.score <- Crepuscularity(wtbs.dat, "Wild-Type")
 
 
