@@ -3,6 +3,7 @@
 
 library(ggplot2)
 library(dplyr)
+library(Ternary)
 
 # Reading in data
 
@@ -73,15 +74,9 @@ ggplot(dat, aes(x=Strain,y=Locomotion, fill=Time)) +
   guides(fill = guide_legend(override.aes = list(shape = NA)))
 
 
-
-
-
-plot(1, type = "n", xlim = c(1, ncol(df)), ylim = c(0, max(df)), xlab = "Group", ylab = "Value")
-for (i in 1:ncol(df)) {
-  points(rep(i, nrow(df)), df[, i], pch = 16)
-}
-
-
+##Ternary Plot
+TernaryPlot()
+TernaryPoints()
 
 
 

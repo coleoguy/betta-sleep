@@ -110,6 +110,21 @@ GetTimed <- function(files, reclen = 48, window = 0.2) {
   }
   return(df)
 }
+Crepuscularity <- function(files, strain, reclen = 48, window = 0.2 ) {
+  dat <- GetData(files, reclen, window)
+  
+  df <- data.frame(matrix(NA, nrow = length(dat[,1]), ncol = 4))
+  colnames(df) <- c("day", "twilight", "night")
+  
+  for (i in 1:length(dat[,1])) {
+    df[i,1] <- sum(dat[i,c(1:45,116:165,236:240)])/sum(dat[i,])
+    df[i,2] <- sum(dat[i,c(46:55,106:115,166:175,226:235)])/sum(dat[i,])
+    df[i,3] <- sum(dat[i,c(56:105,176:225)])/sum(dat[i,])
+  }
+  df[,4] <- strain
+  
+  return(df)
+}
 ## TODO turn into function that can be run modular
 TimedAct <- function(files, reclen = 48, window = 0.2) {
   #get act
@@ -201,6 +216,7 @@ yp.csv <- c("data/YP-01-02-mar31DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
 yp.act <- GetAct(yp.csv, 48, 0.2)
 yp.rest <- GetBouts(yp.csv, yp.act)
 yp.timed <- GetTimed(yp.csv)
+yp.score <- Crepuscularity(yp.csv, "Yellow Plakat")
 
 #Super Red
 sr.csv <- c("data/SR-01-02-May23DLC_dlcrnetms5_yp-wtMay2shuffle1_80000_el.csv",
