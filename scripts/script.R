@@ -69,7 +69,7 @@ GetAct <- function(dat, reclen = 48, window = 0.2){
   return(df)
 }
 CountRest <- function(files, drift = 4.5, reclen = 48, window = 0.0003) {
-
+  
   dat <- GetData(files, reclen, window)
   drift <- drift*(61/640)
   bouts <- c()
@@ -80,6 +80,7 @@ CountRest <- function(files, drift = 4.5, reclen = 48, window = 0.0003) {
   return(bouts)
 }
 GetBouts <- function(files, act){
+  
   dat <- act
   rbouts <- CountRest(files)
   dat$time <- round(seq(from=0, to=48, length.out=240), 2)
@@ -98,8 +99,7 @@ GetBouts <- function(files, act){
   return(dat)
 }
 GetTimed <- function(dat, reclen = 48, window = 0.2) {
-  
-  dat <- GetData(files, reclen, window)
+
   df <- data.frame(matrix(NA, nrow = length(dat[,1]), ncol = 3))
   colnames(df) <- c("day", "twilight", "night")
   for (i in 1:length(dat[,1])) {
@@ -123,86 +123,6 @@ Crepuscularity <- function(dat, strain, reclen = 48, window = 0.2 ) {
   
   return(df)
 }
-## TODO turn into function that can be run modular
-TimedAct <- function(files, reclen = 48, window = 0.2) {
-  #get act
-  yp.act <- GetAct(yp.csv, 48, 0.2)
-  sr.act <- GetAct(sr.csv, 48, 0.2)
-  wtbs.act <- GetAct(wtbs.csv, 48, 0.2)
-  plot(yp.act$activity, type = 'l', col = "#ffdd00")
-  lines(sr.act$activity, col = "#500000")
-  lines(wtbs.act$activity, col = "#88ff33")
-  #create day and night df
-  yp.dn <- data.frame(matrix(NA, ncol = 3, nrow = 240))
-  colnames(yp.dn) <- c("time", "movement", "strain")
-  yp.dn[,2] <- yp.act[,1]
-  sr.dn <- data.frame(matrix(NA, ncol = 3, nrow = 240))
-  colnames(sr.dn) <- c("time", "movement", "strain")
-  sr.dn[,2] <- sr.act[,1]
-  wtbs.dn <- data.frame(matrix(NA, ncol = 3, nrow = 240))
-  colnames(wtbs.dn) <- c("time", "movement", "strain")
-  wtbs.dn[,2] <- wtbs.act[,1]
-  # assign time and strain in dn.df
-  yp.dn[1:45,1] <- "day"
-  yp.dn[46:105,1] <- "night"
-  yp.dn[106:165,1] <- "day"
-  yp.dn[166:225,1] <- "night"
-  yp.dn[226:240,1] <- "day"
-  yp.dn[,3] <- "YellowPlakat"
-  sr.dn[1:45,1] <- "day"
-  sr.dn[46:105,1] <- "night"
-  sr.dn[106:165,1] <- "day"
-  sr.dn[166:225,1] <- "night"
-  sr.dn[226:240,1] <- "day"
-  sr.dn[,3] <- "SuperRed"
-  wtbs.dn[1:45,1] <- "day"
-  wtbs.dn[46:105,1] <- "night"
-  wtbs.dn[106:165,1] <- "day"
-  wtbs.dn[166:225,1] <- "night"
-  wtbs.dn[226:240,1] <- "day"
-  wtbs.dn[,3] <- "BettaSplendensWT"
-  #merge into day.night
-  day.night <- rbind(yp.dn, sr.dn, wtbs.dn)
-  # include twilight
-  yp.dnt <- yp.dn
-  yp.dnt[46:55,1] <- "twilight"
-  yp.dnt[106:115,1] <- "twilight"
-  yp.dnt[166:175,1] <- "twilight"
-  yp.dnt[226:235,1] <- "twilight"
-  sr.dnt <- sr.dn
-  sr.dnt[46:55,1] <- "twilight"
-  sr.dnt[106:115,1] <- "twilight"
-  sr.dnt[166:175,1] <- "twilight"
-  sr.dnt[226:235,1] <- "twilight"
-  wtbs.dnt <- wtbs.dn
-  wtbs.dnt[46:55,1] <- "twilight"
-  wtbs.dnt[106:115,1] <- "twilight"
-  wtbs.dnt[166:175,1] <- "twilight"
-  wtbs.dnt[226:235,1] <- "twilight"
-  twilight <- rbind(yp.dnt, sr.dnt, wtbs.dnt)
-  #turn by 12min to by minute
-  twilight$movement <- twilight$movement/12
-  
-  # trying to find the crepuscularity metric
-  crepuscularity <- data.frame(matrix(NA, ncol = 5, nrow = 9))
-  colnames(crepuscularity) <- c("min", "max", "value", "time", "strain")
-  
-  crepuscularity[9,2] <- max(wtbs.dnt[wtbs.dnt$time == "twilight", 2])
-  crepuscularity[9,1] <- min(wtbs.dnt[wtbs.dnt$time == "twilight", 2])
-  crepuscularity[9,4] <- "twilight"
-  crepuscularity[9,5] <- "WT"
-  
-  crepuscularity[,3] <- crepuscularity[,1]/crepuscularity[,2]
-  # read in the data as twilight
-  ## Possible formula for crepuscularity
-  # C = ( 1 - (max(day)+max(night)/2)/max(twilight) - abs|max(night)-max(day)| )
-  # could be either max or mean for day and night
-  
-  fit <- glm(movement ~ time + strain, data=twilight)
-  summary(fit)
-  step(fit)
-}
-
 
 ### Data Analysis ###
 
